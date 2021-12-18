@@ -4,7 +4,7 @@ Devnet explorer can be found [here](https://explorer.solana.com/?cluster=devnet)
 
 ## NFTs
 
-- By wallet: Bh9tfNzq8rf9gGG8DZnWWmYkew8YdYx9LgxTBkSoKNvL
+- Local dev pubkey: Bh9tfNzq8rf9gGG8DZnWWmYkew8YdYx9LgxTBkSoKNvL
 - NFTs
     - #0 address: https://arweave.net/1sJ_3XRmaULv9dPSDkv8NyBOO690lBO1iLjJ-rzMP-A
     - #1 address: https://arweave.net/EB_O3EudhLmoD0-IVO4xOG1fTB8rNIex2kMj33AvHDk

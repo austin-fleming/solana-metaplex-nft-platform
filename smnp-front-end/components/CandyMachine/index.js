@@ -1,3 +1,4 @@
+// Most of this code is part of Metaplex's frontend library
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Program, Provider, web3 } from "@project-serum/anchor";
 import { MintLayout, TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
