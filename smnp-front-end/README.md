@@ -5,6 +5,14 @@
 - ts-node installed globally
 - solana installed
 
+## General Resources
+
+- [Arweave Storage Calculator](https://arweavefees.com/)
+
+## Notes
+
+- Metaplex is sort of like Shopify. When you deploy a candy machine, it isn't built from scratch, but added to Metaplex's existing protocol. Only you can mess with the NFTs [per these docs](https://docs.metaplex.com/architecture/deep_dive/token_vault).
+
 ## Solana setup
 
 In order to start developing on the devnet:
@@ -13,7 +21,7 @@ In order to start developing on the devnet:
 - Run ```solana config set --url https://api.devnet.solana.com```
 - Run ```solana config get```
 
-In order to get metaplex running:
+In order to get metaplex CLI running:
 
 - Clone the repo: ```git clone --branch v1.0.0 https://github.com/metaplex-foundation/metaplex.git ~/github/resources/metaplex-foundation/metaplex```
 - Install preemptively any needed dependencies for m1 chip: [see here](https://docs.metaplex.com/create-store/installation)
@@ -22,3 +30,31 @@ In order to get metaplex running:
 ## NFT Setup
 
 - See Metaplex [metadata docs](https://docs.metaplex.com/nft-standard#json-structure)
+
+## Launching to Devnet
+
+- Launch phases:
+    - Upload NFTs to [Arweave](https://www.arweave.org/)
+    - Create candy machine on Metaplex contract
+    - Update candy machine with the proper drop date for NFTs: when people can start minting
+- To upload, you need a to set a keypair
+    - Create keypair: ```solana-keygen new --outfile ~/.config/solana/devnet.json``` You can ignore the prompt for a passphrase.
+    - Set keypair as default: ```solana config set --keypair ~/.config/solana/devnet.json```
+- Make sure you have transaction funds:
+    - Run ```solana balance``` to view current balance
+    - Request test SOL for devnet: ```solana airdrop <amount>```
+- Uploading:
+    - Get local development address: ```solana address``` and add to NFT jsons
+    - Upload assets ```ts-node ~/github/resources/metaplex-foundation/metaplex/js/packages/cli/src/candy-machine-cli.ts upload ./assets --env devnet --keypair ~/.config/solana/devnet.json```
+        - Says: "Hey Metaplex CLI, take all the NFT pairs in my assets folder, upload them to Arweave, initialize the candy machine config holding the pointers to these NFTs, and then save that config on Solana's devnet"
+        - You can view the transaction on the devnet by searching the public key of the config [on this site](https://explorer.solana.com/?cluster=devnet)
+    - Verify upload: ```ts-node ~/github/resources/metaplex-foundation/metaplex/js/packages/cli/src/candy-machine-cli.ts verify --keypair ~/.config/solana/devnet.json```
+
+At this point, the candy machine still isn't deployed. Only a config and assets for it to use later. Additionally, a ```.cache``` folder has been created as a sibling to the ```assets``` folder. This would have to be removed if you want to update your NFTs.
+
+- Deploying candy machine to devnet:
+    - ```ts-node ~/github/resources/metaplex-foundation/metaplex/js/packages/cli/src/candy-machine-cli.ts create_candy_machine --env devnet --keypair ~/.config/solana/devnet.json -p 1```
+        - runs ```create_candy_machine```
+        - ```-p``` flag sets price
+        - save the pubkey it produces
+    - You can now update the CM with a drop date: ```ts-node ~/github/resources/metaplex-foundation/metaplex/js/packages/cli/src/candy-machine-cli.ts update_candy_machine --date "1 Dec 2021 00:12:00 GMT" --env devnet --keypair ~/.config/solana/devnet.json```
