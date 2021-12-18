@@ -1,0 +1,4 @@
+.machineContainer {
+    display: flex;
+    flex-direction: column;
+  }

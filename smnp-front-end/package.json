@@ -1,0 +1,23 @@
+{
+  "name": "my-app",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@metaplex/js": "^4.7.0",
+    "@project-serum/anchor": "^0.18.2",
+    "@solana/web3.js": "^1.30.2",
+    "dotenv": "^10.0.0",
+    "next": "12.0.7",
+    "react": "17.0.2",
+    "react-dom": "17.0.2"
+  },
+  "devDependencies": {
+    "eslint": "8.4.1",
+    "eslint-config-next": "12.0.7"
+  }
+}
