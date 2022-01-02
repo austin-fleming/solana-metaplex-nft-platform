@@ -2,6 +2,7 @@ import Head from "next/head";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import S from "../styles/Home.module.css";
+import CandyMachine from '../components/CandyMachine'
 
 // Constants
 const TWITTER_HANDLE = "_buildspace";
@@ -76,6 +77,7 @@ const Home = () => {
             renderNotConnectedContainer()
           )}
         </div>
+        {walletAddress && <CandyMachine walletAddress={walletAddress}/>}
         <div className={S.footerContainer}>
           <Image
             alt="Twitter Logo"

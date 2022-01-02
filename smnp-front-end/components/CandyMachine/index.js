@@ -1,4 +1,5 @@
 // Most of this code is part of Metaplex's frontend library
+import {useEffect, useState} from 'react'
 import { Connection, PublicKey } from "@solana/web3.js";
 import { Program, Provider, web3 } from "@project-serum/anchor";
 import { MintLayout, TOKEN_PROGRAM_ID, Token } from "@solana/spl-token";
@@ -9,11 +10,12 @@ import {
   TOKEN_METADATA_PROGRAM_ID,
   SPL_ASSOCIATED_TOKEN_ACCOUNT_PROGRAM_ID,
 } from "./helpers";
+
 const {
   metadata: { Metadata, MetadataProgram },
 } = programs;
 
-const config = new web3.PublicKey(process.env.REACT_APP_CANDY_MACHINE_CONFIG);
+const config = new web3.PublicKey(process.env.NEXT_PUBLIC_CANDY_MACHINE_CONFIG);
 const { SystemProgram } = web3;
 const opts = {
   preflightCommitment: "processed",
@@ -25,10 +27,12 @@ const MAX_SYMBOL_LENGTH = 10;
 const MAX_CREATOR_LEN = 32 + 1 + 1;
 
 const CandyMachine = ({ walletAddress }) => {
+  const [machineStats, setMachineStats] = useState(null)
+
   // Actions
   const fetchHashTable = async (hash, metadataEnabled) => {
     const connection = new web3.Connection(
-      process.env.REACT_APP_SOLANA_RPC_HOST
+      process.env.NEXT_PUBLIC_SOLANA_RPC_HOST
     );
 
     const metadataAccounts = await MetadataProgram.getProgramAccounts(
@@ -116,7 +120,7 @@ const CandyMachine = ({ walletAddress }) => {
       );
       const metadata = await getMetadata(mint.publicKey);
       const masterEdition = await getMasterEdition(mint.publicKey);
-      const rpcHost = process.env.REACT_APP_SOLANA_RPC_HOST;
+      const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST;
       const connection = new Connection(rpcHost);
       const rent = await connection.getMinimumBalanceForRentExemption(
         MintLayout.span
@@ -124,9 +128,9 @@ const CandyMachine = ({ walletAddress }) => {
 
       const accounts = {
         config,
-        candyMachine: process.env.REACT_APP_CANDY_MACHINE_ID,
+        candyMachine: process.env.NEXT_PUBLIC_CANDY_MACHINE_ID,
         payer: walletAddress.publicKey,
-        wallet: process.env.REACT_APP_TREASURY_ADDRESS,
+        wallet: process.env.NEXT_PUBLIC_TREASURY_ADDRESS,
         mint: mint.publicKey,
         metadata,
         masterEdition,
@@ -250,10 +254,72 @@ const CandyMachine = ({ walletAddress }) => {
     });
   };
 
-  return (
+  /*  */
+
+  const getProvider = () => {
+    const rpcHost = process.env.NEXT_PUBLIC_SOLANA_RPC_HOST
+    // create new connection object
+    const connection = new Connection(rpcHost)
+
+    // create new Solana provider object
+    const provider = new Provider(
+      connection,
+      window.solana,
+      opts.preflightCommitment
+    )
+    
+    return provider
+  }
+
+  const getCandyMachineState = async () => {
+    const provider = getProvider()
+
+    // get metadata about your deployed candy machine program
+    // idl has info about how to interact w/ the candy machine
+    const idl = await Program.fetchIdl(candyMachineProgram, provider)
+
+    // create callable program
+    const program = new Program(idl, candyMachineProgram, provider)
+
+    // Fetch the metadata from your candy machine
+    const candyMachine = await program.account.candyMachine.fetch(
+      process.env.NEXT_PUBLIC_CANDY_MACHINE_ID
+    )
+
+    // Parse out all our metadata and log it out
+    const itemsAvailable = candyMachine.data.itemsAvailable.toNumber()
+    const itemsRedeemed = candyMachine.itemsRedeemed.toNumber()
+    const itemsRemaining = itemsAvailable - itemsRedeemed
+    const goLiveData = candyMachine.data.goLiveDate.toNumber()
+
+    // We will be using this later in our UI so let's generate this now
+    const goLiveDateTimeString = `${new Date(
+      goLiveData * 1000
+    ).toLocaleDateString()} @ ${new Date(
+      goLiveData * 1000
+    ).toLocaleTimeString()}`;
+
+    setMachineStats({
+      itemsAvailable,
+      itemsRedeemed,
+      itemsRemaining,
+      goLiveData,
+      goLiveDateTimeString
+    })
+
+    console.log(machineStats)
+  }
+
+  useEffect(() => {
+    getCandyMachineState()
+  }, [])
+
+
+  return machineStats && (
     <div className={S.machineContainer}>
-      <p>Drop Date:</p>
-      <p>Items Minted:</p>
+      <p>Drop Date: {machineStats.goLiveDateTimeString}</p>
+      <p>Items Minted: {machineStats.itemsRedeemed}</p>
+      <p>Items Remaining: {machineStats.itemsRemaining}</p>
       <button onClick={mintToken}>
         Mint NFT
       </button>
